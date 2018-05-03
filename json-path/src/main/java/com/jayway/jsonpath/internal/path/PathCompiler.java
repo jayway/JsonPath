@@ -320,10 +320,6 @@ public class PathCompiler {
                     if (0 == groupSingleQuote && null != type) {
                         switch (type) {
                             case STRING:
-                                if (parameters.size() > 0) {
-                                    throw new InvalidPathException("Arguments to function: '" + funcName + "' are not closed properly.");
-                                }
-
                                 Parameter param = new Parameter();
                                 param.setString(parameter.toString());
                                 param.setType(ParamType.STRING);
