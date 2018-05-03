@@ -271,7 +271,7 @@ public class PathCompiler {
 
         // Parenthesis starts at 1 since we're marking the start of a function call, the close paren will denote the
         // last parameter boundary
-        Integer groupParen = 1, groupBracket = 0, groupBrace = 0, groupQuote = 0;
+        Integer groupParen = 1, groupBracket = 0, groupBrace = 0, groupDoubleQuote = 0, groupSingleQuote = 0;
         Boolean endOfStream = false;
         char priorChar = 0;
         List<Parameter> parameters = new ArrayList<Parameter>();
@@ -289,6 +289,9 @@ public class PathCompiler {
                 if (c == OPEN_BRACE || isDigit(c) || DOUBLE_QUOTE == c) {
                     type = ParamType.JSON;
                 }
+                else if (c == SINGLE_QUOTE) {
+                    type = ParamType.STRING;
+                }
                 else if (isPathContext(c)) {
                     type = ParamType.PATH; // read until we reach a terminating comma and we've reset grouping to zero
                 }
@@ -296,14 +299,41 @@ public class PathCompiler {
 
             switch (c) {
                 case DOUBLE_QUOTE:
-                    if (priorChar != '\\' && groupQuote > 0) {
-                        if (groupQuote == 0) {
+                    if (priorChar != '\\' && groupDoubleQuote > 0) {
+                        if (groupDoubleQuote == 0) {
                             throw new InvalidPathException("Unexpected quote '\"' at character position: " + path.position());
                         }
-                        groupQuote--;
+                        groupDoubleQuote--;
                     }
                     else {
-                        groupQuote++;
+                        groupDoubleQuote++;
+                    }
+                    break;
+                case SINGLE_QUOTE:
+                    if (groupSingleQuote > 0) {
+                        groupSingleQuote--;
+                    }
+                    else {
+                        groupSingleQuote++;
+                    }
+
+                    if (0 == groupSingleQuote && null != type) {
+                        switch (type) {
+                            case STRING:
+                                if (parameters.size() > 0) {
+                                    throw new InvalidPathException("Arguments to function: '" + funcName + "' are not closed properly.");
+                                }
+
+                                Parameter param = new Parameter();
+                                param.setString(parameter.toString());
+                                param.setType(ParamType.STRING);
+
+                                parameters.add(param);
+
+                                parameter.delete(0, parameter.length());
+                                type = null;
+                                break;
+                        }
                     }
                     break;
                 case OPEN_PARENTHESIS:
@@ -339,7 +369,7 @@ public class PathCompiler {
                 case COMMA:
                     // In this state we've reach the end of a function parameter and we can pass along the parameter string
                     // to the parser
-                    if ((0 == groupQuote && 0 == groupBrace && 0 == groupBracket
+                    if ((0 == groupDoubleQuote && 0 == groupBrace && 0 == groupBracket && 0 == groupSingleQuote
                             && ((0 == groupParen && CLOSE_PARENTHESIS == c) || 1 == groupParen))) {
                         endOfStream = (0 == groupParen);
 
@@ -366,7 +396,10 @@ public class PathCompiler {
                     break;
             }
 
-            if (type != null && !(c == COMMA && 0 == groupBrace && 0 == groupBracket && 1 == groupParen)) {
+            if (type != null && ParamType.STRING == type && groupSingleQuote > 0 && c != SINGLE_QUOTE) {
+                parameter.append(c);
+            }
+            else if (type != null && ParamType.STRING != type && !(c == COMMA && 0 == groupBrace && 0 == groupBracket && 1 == groupParen)) {
                 parameter.append(c);
             }
             priorChar = c;

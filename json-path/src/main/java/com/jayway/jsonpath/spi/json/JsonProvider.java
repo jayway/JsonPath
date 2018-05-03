@@ -15,9 +15,11 @@
 package com.jayway.jsonpath.spi.json;
 
 import com.jayway.jsonpath.InvalidJsonException;
+import com.jayway.jsonpath.internal.function.Parameter;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 
 public interface JsonProvider {
 
@@ -74,6 +76,8 @@ public interface JsonProvider {
      * @return the number of entries in the array or object
      */
     int length(Object obj);
+
+    String join(Object obj, String delimiter);
 
     /**
      * Converts given array to an {@link Iterable}

@@ -24,14 +24,13 @@ import com.jayway.jsonpath.internal.Path;
  * Acts like a lambda function with references, but since we're supporting JDK 6+, we're left doing this...
  *
  */
-public class PathLateBindingValue implements ILateBindingValue {
+public class PathArrayLateBindingValue implements ILateBindingValue {
     private final Path path;
-    private final Object rootDocument;
+    private Object rootDocument;
     private final Configuration configuration;
 
-    public PathLateBindingValue(final Path path, final Object rootDocument, final Configuration configuration) {
+    public PathArrayLateBindingValue(final Path path, final Configuration configuration) {
         this.path = path;
-        this.rootDocument = rootDocument;
         this.configuration = configuration;
     }
 
@@ -42,5 +41,9 @@ public class PathLateBindingValue implements ILateBindingValue {
      */
     public Object get() {
         return path.evaluate(rootDocument, rootDocument, configuration).getValue();
+    }
+
+    public void setRootDocument(Object rootDocument) {
+        this.rootDocument = rootDocument;
     }
 }
