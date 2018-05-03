@@ -15,8 +15,10 @@
 package com.jayway.jsonpath.spi.json;
 
 import com.jayway.jsonpath.JsonPathException;
+import com.jayway.jsonpath.internal.function.Parameter;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -153,6 +155,33 @@ public abstract class AbstractJsonProvider implements JsonProvider {
             return ((String)obj).length();
         }
         throw new JsonPathException("length operation cannot be applied to " + obj!=null?obj.getClass().getName():"null");
+    }
+
+    public String join(Object obj, String delimiter) {
+        if (isArray(obj)) {
+            StringBuilder builder = new StringBuilder();
+            Iterator iterator = toIterable(obj).iterator();
+            while (iterator.hasNext()) {
+                builder.append(iterator.next());
+                if (iterator.hasNext()) {
+                    builder.append(delimiter);
+                }
+            }
+            return builder.toString();
+        } else if (isMap(obj)){
+            StringBuilder builder = new StringBuilder();
+            Iterator<String> iterator = getPropertyKeys(obj).iterator();
+            while (iterator.hasNext()) {
+                builder.append(getMapValue(obj, iterator.next()));
+                if (iterator.hasNext()) {
+                    builder.append(delimiter);
+                }
+            }
+            return builder.toString();
+        } else if(obj instanceof String){
+            return (String) obj;
+        }
+        throw new JsonPathException("join operation cannot be applied to " + obj!=null?obj.getClass().getName():"null");
     }
 
     /**

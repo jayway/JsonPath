@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BaseFunctionTest {
     protected static final String NUMBER_SERIES = "{\"empty\": [], \"numbers\" : [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}";
     protected static final String TEXT_SERIES = "{\"urls\": [\"http://api.worldbank.org/countries/all/?format=json\", \"http://api.worldbank.org/countries/all/?format=json\"], \"text\" : [ \"a\", \"b\", \"c\", \"d\", \"e\", \"f\" ]}";
+    protected static final String TEXT_JOIN_SERIES = "{\"urls\": [\"http://api.worldbank.org/countries/all/?format=json\", \"http://api.worldbank.org/countries/all/?format=json\"], \"text\" : [ { \"value\": \"a\", \"int\": 1 }, { \"value\": \"b\", \"int\": 2 }, { \"value\": \"c\", \"int\": 3 }, { \"value\": \"d\", \"int\": 4 }, { \"value\": \"e\", \"int\": 5 }, { \"value\": \"f\", \"int\": 6 } ]}";
 
     /**
      * Verify the function returns the correct result based on the input expectedValue
