@@ -39,9 +39,9 @@ public class FunctionPathToken extends PathToken {
     public void evaluate(String currentPath, PathRef parent, Object model, EvaluationContextImpl ctx) {
         PathFunction pathFunction = PathFunctionFactory.newFunction(functionName);
         evaluateParameters(currentPath, parent, model, ctx);
-        Object result = pathFunction.invoke(currentPath, parent, model, ctx, functionParams);
+        Object result = pathFunction.invoke(isLeaf() ? null : next(), currentPath, parent, model, ctx, functionParams);
         ctx.addResult(currentPath + "." + functionName, parent, result);
-        if (!isLeaf()) {
+        if (!isLeaf() && !"join".equals(functionName)) {
             next().evaluate(currentPath, parent, result, ctx);
         }
     }
@@ -54,7 +54,7 @@ public class FunctionPathToken extends PathToken {
                     switch (param.getType()) {
                         case PATH:
                             if (ctx.configuration().jsonProvider().isArray(model)) {
-                                param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), ctx.configuration()));
+                                param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), model, ctx.configuration()));
                             } else {
                                 param.setLateBinding(new PathLateBindingValue(param.getPath(), ctx.rootDocument(), ctx.configuration()));
                             }

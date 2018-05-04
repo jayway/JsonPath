@@ -43,4 +43,16 @@ public class PathLateBindingValue implements ILateBindingValue {
     public Object get() {
         return path.evaluate(rootDocument, rootDocument, configuration).getValue();
     }
+
+    protected Path getPath() {
+        return path;
+    }
+
+    public Object getRootDocument() {
+        return rootDocument;
+    }
+
+    protected Configuration getConfiguration() {
+        return configuration;
+    }
 }

@@ -4,6 +4,7 @@ import com.jayway.jsonpath.internal.EvaluationContext;
 import com.jayway.jsonpath.internal.PathRef;
 import com.jayway.jsonpath.internal.function.Parameter;
 import com.jayway.jsonpath.internal.function.PathFunction;
+import com.jayway.jsonpath.internal.path.PathToken;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 public class Append implements PathFunction {
     @Override
-    public Object invoke(String currentPath, PathRef parent, Object model, EvaluationContext ctx, List<Parameter> parameters) {
+    public Object invoke(PathToken next, String currentPath, PathRef parent, Object model, EvaluationContext ctx, List<Parameter> parameters) {
         JsonProvider jsonProvider = ctx.configuration().jsonProvider();
         if (parameters != null && parameters.size() > 0) {
             for (Parameter param : parameters) {

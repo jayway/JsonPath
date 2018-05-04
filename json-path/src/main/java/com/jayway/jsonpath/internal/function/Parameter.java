@@ -34,11 +34,8 @@ public class Parameter {
         return lateBinding.get();
     }
 
-    public Object getValue(Object rootDocument) {
-        if (lateBinding instanceof PathArrayLateBindingValue) {
-            ((PathArrayLateBindingValue) lateBinding).setRootDocument(rootDocument);
-        }
-        return lateBinding.get();
+    public ILateBindingValue getLateBinding() {
+        return lateBinding;
     }
 
     public void setLateBinding(ILateBindingValue lateBinding) {
@@ -124,7 +121,7 @@ public class Parameter {
         return ", ";
     }
 
-    public static List<Parameter> toParamJoinValue(final EvaluationContext ctx, final List<Parameter> parameters) {
+    public static List<Parameter> toParamJoinValue(final List<Parameter> parameters) {
         if (parameters.size() > 1) {
             Parameter[] values = Arrays.copyOfRange(parameters.toArray(new Parameter[0]), 1, parameters.size());
             return Arrays.asList(values);
@@ -135,10 +132,15 @@ public class Parameter {
     public static Object toConvertJoinValue(final Object model, final EvaluationContext ctx, final List<Parameter> parameters) {
         List values = new ArrayList();
         if (null != parameters && !parameters.isEmpty()) {
-            for (int i = 0; i < parameters.size(); i++) {
+            for (Parameter parameter : parameters) {
                 if (ctx.configuration().jsonProvider().isArray(model)) {
-                    for (Object o : ctx.configuration().jsonProvider().toIterable(model)) {
-                        consume(Object.class, ctx, values, parameters.get(i).getValue(o));
+                    int i = 0;
+                    Iterator iterator = ctx.configuration().jsonProvider().toIterable(model).iterator();
+                    for (;iterator.hasNext(); iterator.next()) {
+                        if (parameter.getLateBinding() instanceof  PathArrayLateBindingValue) {
+                            ((PathArrayLateBindingValue) parameter.getLateBinding()).setIndex(i++);
+                        }
+                        consume(Object.class, ctx, values, parameter.getValue());
                     }
                 }
             }
