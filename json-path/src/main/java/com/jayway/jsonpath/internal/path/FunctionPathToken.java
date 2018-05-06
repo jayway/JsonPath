@@ -56,9 +56,9 @@ public class FunctionPathToken extends PathToken {
                             if ("join".equals(functionName)) {
                                 param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), model, ctx.configuration()));
                             } else {
-                                param.setLateBinding(new PathLateBindingValue(param.getPath(), ctx.rootDocument(), ctx.configuration()));
+                                param.setLateBinding(new PathLateBindingValue(param.getPath(), "$".equals(currentPath) ? model : ctx.rootDocument(), ctx.configuration()));
                             }
-                            param.setEvaluated(true);
+                            param.setEvaluated(!"$".equals(currentPath));
                             break;
                         case JSON:
                             param.setLateBinding(new JsonLateBindingValue(ctx.configuration().jsonProvider(), param));
