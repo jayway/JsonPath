@@ -34,11 +34,8 @@ public class Parameter {
         return lateBinding.get();
     }
 
-    public Object getValue(Object rootDocument) {
-        if (lateBinding instanceof PathArrayLateBindingValue) {
-            ((PathArrayLateBindingValue) lateBinding).setRootDocument(rootDocument);
-        }
-        return lateBinding.get();
+    public ILateBindingValue getLateBinding() {
+        return lateBinding;
     }
 
     public void setLateBinding(ILateBindingValue lateBinding) {
@@ -124,26 +121,21 @@ public class Parameter {
         return ", ";
     }
 
-    public static List<Parameter> toParamJoinValue(final EvaluationContext ctx, final List<Parameter> parameters) {
+    public static Parameter toPathJoin(final List<Parameter> parameters) {
         if (parameters.size() > 1) {
-            Parameter[] values = Arrays.copyOfRange(parameters.toArray(new Parameter[0]), 1, parameters.size());
-            return Arrays.asList(values);
+            return parameters.get(1);
         }
-        return Collections.emptyList();
+        return null;
     }
 
-    public static Object toConvertJoinValue(final Object model, final EvaluationContext ctx, final List<Parameter> parameters) {
+    public static Object toConvertJoinValue(final Object model, final int index, final EvaluationContext ctx, final Parameter parameter) {
         List values = new ArrayList();
-        if (null != parameters && !parameters.isEmpty()) {
-            for (int i = 0; i < parameters.size(); i++) {
-                if (ctx.configuration().jsonProvider().isArray(model)) {
-                    for (Object o : ctx.configuration().jsonProvider().toIterable(model)) {
-                        consume(Object.class, ctx, values, parameters.get(i).getValue(o));
-                    }
-                }
+        if (null != parameter) {
+            if (parameter.getLateBinding() instanceof PathArrayLateBindingValue) {
+                ((PathArrayLateBindingValue) parameter.getLateBinding()).setIndex(index);
             }
-
-            return values;
+            consume(Object.class, ctx, values, parameter.getValue());
+            return ctx.configuration().jsonProvider().isArray(model) ? values : !values.isEmpty() ? values.get(0) : null;
         }
 
         return model;

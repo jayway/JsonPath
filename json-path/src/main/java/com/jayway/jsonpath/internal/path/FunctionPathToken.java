@@ -53,8 +53,8 @@ public class FunctionPathToken extends PathToken {
                 if (!param.hasEvaluated()) {
                     switch (param.getType()) {
                         case PATH:
-                            if (ctx.configuration().jsonProvider().isArray(model)) {
-                                param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), ctx.configuration()));
+                            if ("join".equals(functionName)) {
+                                param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), model, ctx.configuration()));
                             } else {
                                 param.setLateBinding(new PathLateBindingValue(param.getPath(), ctx.rootDocument(), ctx.configuration()));
                             }
