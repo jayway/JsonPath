@@ -2,7 +2,6 @@ package com.jayway.jsonpath.internal.function;
 
 import com.jayway.jsonpath.internal.EvaluationContext;
 import com.jayway.jsonpath.internal.PathRef;
-import com.jayway.jsonpath.internal.path.PathToken;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
 public class PassthruPathFunction extends AbstractPathFunction {
 
     @Override
-    public Object invoke(PathToken next, String currentPath, PathRef parent, Object model, EvaluationContext ctx, List<Parameter> parameters) {
+    public Object invoke(String currentPath, PathRef parent, Object model, EvaluationContext ctx, List<Parameter> parameters) {
         return model;
     }
 }

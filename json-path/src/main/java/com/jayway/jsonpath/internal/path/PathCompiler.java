@@ -9,7 +9,10 @@ import com.jayway.jsonpath.internal.filter.FilterCompiler;
 import com.jayway.jsonpath.internal.function.ParamType;
 import com.jayway.jsonpath.internal.function.Parameter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import static java.lang.Character.isDigit;
 import static java.util.Arrays.asList;
@@ -41,7 +44,6 @@ public class PathCompiler {
 
     private final LinkedList<Predicate> filterStack;
     private final CharacterIndex path;
-    private final Stack<PathToken> stackFunctions;
 
     private PathCompiler(String path, LinkedList<Predicate> filterStack){
         this(new CharacterIndex(path), filterStack);
@@ -50,7 +52,6 @@ public class PathCompiler {
     private PathCompiler(CharacterIndex path, LinkedList<Predicate> filterStack){
         this.filterStack = filterStack;
         this.path = path;
-        this.stackFunctions = new Stack<PathToken>();
     }
 
     private Path compile() {
@@ -147,12 +148,8 @@ public class PathCompiler {
                 return readWildCardToken(appender) ||
                         fail("Could not parse token starting at position " + path.position());
             default:
-                boolean read = readPropertyOrFunctionToken(appender) ||
+                return readPropertyOrFunctionToken(appender) ||
                         fail("Could not parse token starting at position " + path.position());
-                while (!stackFunctions.empty()) {
-                    appender.appendPathToken(stackFunctions.pop());
-                }
-                return read;
         }
     }
 
@@ -217,7 +214,7 @@ public class PathCompiler {
                     path.setPosition(endPosition+1);
                     // parse the arguments of the function - arguments that are inner queries or JSON document(s)
                     String functionName = path.subSequence(startPosition, endPosition).toString();
-                    functionParameters = parseFunctionParameters(functionName, appender);
+                    functionParameters = parseFunctionParameters(functionName);
                 } else {
                     path.setPosition(readPosition + 1);
                 }
@@ -232,7 +229,7 @@ public class PathCompiler {
 
         String property = path.subSequence(startPosition, endPosition).toString();
         if(isFunction){
-            stackFunctions.add(PathTokenFactory.createFunctionPathToken(property, functionParameters));
+            appender.appendPathToken(PathTokenFactory.createFunctionPathToken(property, functionParameters));
         } else {
             appender.appendPathToken(PathTokenFactory.createSinglePropertyPathToken(property, SINGLE_QUOTE));
         }
@@ -269,7 +266,7 @@ public class PathCompiler {
      *      an array of values and/or can consume parameters in addition to the values provided from the consumption of
      *      an array.
      */
-    private List<Parameter> parseFunctionParameters(String funcName, PathTokenAppender appender) {
+    private List<Parameter> parseFunctionParameters(String funcName) {
         ParamType type = null;
 
         // Parenthesis starts at 1 since we're marking the start of a function call, the close paren will denote the
@@ -393,28 +390,6 @@ public class PathCompiler {
                         }
                     }
                     break;
-                default:
-                    if (Character.isLetter(c)) {
-                        int startPosition = path.position()-1;
-                        int readPosition = startPosition;
-                        boolean isFunction = false;
-
-                        while (path.inBounds(readPosition)) {
-                            char d = path.charAt(readPosition);
-                            if (d == OPEN_PARENTHESIS) {
-                                isFunction = true;
-                                break;
-                            }
-                            readPosition++;
-                        }
-
-                        if (isFunction) {
-                            path.setPosition(startPosition);
-                            if (readPropertyOrFunctionToken(appender)) {
-                                continue;
-                            }
-                        }
-                    }
             }
 
             if (type != null && ParamType.STRING == type && groupSingleQuote > 0 && c != SINGLE_QUOTE) {

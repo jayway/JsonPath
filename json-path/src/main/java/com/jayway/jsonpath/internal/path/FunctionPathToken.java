@@ -4,10 +4,6 @@ import com.jayway.jsonpath.internal.PathRef;
 import com.jayway.jsonpath.internal.function.Parameter;
 import com.jayway.jsonpath.internal.function.PathFunction;
 import com.jayway.jsonpath.internal.function.PathFunctionFactory;
-import com.jayway.jsonpath.internal.function.latebinding.JsonLateBindingValue;
-import com.jayway.jsonpath.internal.function.latebinding.PathArrayLateBindingValue;
-import com.jayway.jsonpath.internal.function.latebinding.PathLateBindingValue;
-import com.jayway.jsonpath.internal.function.latebinding.StringLateBindingValue;
 
 import java.util.List;
 
