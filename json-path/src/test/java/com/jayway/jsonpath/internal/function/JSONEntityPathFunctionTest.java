@@ -64,9 +64,10 @@ public class JSONEntityPathFunctionTest extends BaseFunctionTest {
     @Test
     public void testJoinOfTextArray() {
         // The length of JSONArray is an integer
-//        verifyFunction(conf, "$.text.join(', ')", TEXT_SERIES, "a, b, c, d, e, f");
-        verifyFunction(conf, "$.validate.document.text.join(', ', concat($.value, ' - ', $.int))", TEXT_JOIN_SERIES, "a, b, c, d, e, f");
-//        verifyFunction(conf, "$.validate.document.text.join('|', @.value)", TEXT_JOIN_SERIES, "a|b|c|d|e|f");
+        verifyFunction(conf, "$.text.join(', ')", TEXT_SERIES, "a, b, c, d, e, f");
+        verifyFunction(conf, "$.document.text.join(', ', @.value)", TEXT_JOIN_SERIES, "a, b, c, d, e, f");
+        verifyFunction(conf, "$.document.text.join(', ', $.concat($.value, ' - ', $.int))", TEXT_JOIN_SERIES, "a - 1, b - 2, c - 3, d - 4, e - 5, f - 6");
+        verifyFunction(conf, "$.document.['text'].join('|', @.value)", TEXT_JOIN_SERIES, "a|b|c|d|e|f");
     }
 
     @Test

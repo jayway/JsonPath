@@ -38,39 +38,11 @@ public class FunctionPathToken extends PathToken {
     @Override
     public void evaluate(String currentPath, PathRef parent, Object model, EvaluationContextImpl ctx) {
         PathFunction pathFunction = PathFunctionFactory.newFunction(functionName);
-        evaluateParameters(currentPath, parent, model, ctx);
-        Object result = pathFunction.invoke(isLeaf() ? null : next(), currentPath, parent, model, ctx, functionParams);
+        pathFunction.evaluateParameters(currentPath, parent, model, functionParams, ctx);
+        Object result = pathFunction.invoke(currentPath, parent, model, ctx, functionParams);
         ctx.addResult(currentPath + "." + functionName, parent, result);
-        if (!isLeaf() && !"join".equals(functionName)) {
+        if (!isLeaf()) {
             next().evaluate(currentPath, parent, result, ctx);
-        }
-    }
-
-    private void evaluateParameters(String currentPath, PathRef parent, Object model, EvaluationContextImpl ctx) {
-
-        if (null != functionParams) {
-            for (Parameter param : functionParams) {
-                if (!param.hasEvaluated()) {
-                    switch (param.getType()) {
-                        case PATH:
-                            if (ctx.configuration().jsonProvider().isArray(model)) {
-                                param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), model, ctx.configuration()));
-                            } else {
-                                param.setLateBinding(new PathLateBindingValue(param.getPath(), ctx.rootDocument(), ctx.configuration()));
-                            }
-                            param.setEvaluated(true);
-                            break;
-                        case JSON:
-                            param.setLateBinding(new JsonLateBindingValue(ctx.configuration().jsonProvider(), param));
-                            param.setEvaluated(true);
-                            break;
-                        case STRING:
-                            param.setLateBinding(new StringLateBindingValue(param));
-                            param.setEvaluated(true);
-                            break;
-                    }
-                }
-            }
         }
     }
 

@@ -121,31 +121,21 @@ public class Parameter {
         return ", ";
     }
 
-    public static List<Parameter> toParamJoinValue(final List<Parameter> parameters) {
+    public static Parameter toPathJoin(final List<Parameter> parameters) {
         if (parameters.size() > 1) {
-            Parameter[] values = Arrays.copyOfRange(parameters.toArray(new Parameter[0]), 1, parameters.size());
-            return Arrays.asList(values);
+            return parameters.get(1);
         }
-        return Collections.emptyList();
+        return null;
     }
 
-    public static Object toConvertJoinValue(final Object model, final EvaluationContext ctx, final List<Parameter> parameters) {
+    public static Object toConvertJoinValue(final Object model, final int index, final EvaluationContext ctx, final Parameter parameter) {
         List values = new ArrayList();
-        if (null != parameters && !parameters.isEmpty()) {
-            for (Parameter parameter : parameters) {
-                if (ctx.configuration().jsonProvider().isArray(model)) {
-                    int i = 0;
-                    Iterator iterator = ctx.configuration().jsonProvider().toIterable(model).iterator();
-                    for (;iterator.hasNext(); iterator.next()) {
-                        if (parameter.getLateBinding() instanceof  PathArrayLateBindingValue) {
-                            ((PathArrayLateBindingValue) parameter.getLateBinding()).setIndex(i++);
-                        }
-                        consume(Object.class, ctx, values, parameter.getValue());
-                    }
-                }
+        if (null != parameter) {
+            if (parameter.getLateBinding() instanceof PathArrayLateBindingValue) {
+                ((PathArrayLateBindingValue) parameter.getLateBinding()).setIndex(index);
             }
-
-            return values;
+            consume(Object.class, ctx, values, parameter.getValue());
+            return ctx.configuration().jsonProvider().isArray(model) ? values : !values.isEmpty() ? values.get(0) : null;
         }
 
         return model;
