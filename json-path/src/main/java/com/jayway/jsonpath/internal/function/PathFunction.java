@@ -2,6 +2,7 @@ package com.jayway.jsonpath.internal.function;
 
 import com.jayway.jsonpath.internal.EvaluationContext;
 import com.jayway.jsonpath.internal.PathRef;
+import com.jayway.jsonpath.internal.path.EvaluationContextImpl;
 
 import java.util.List;
 
@@ -33,4 +34,7 @@ public interface PathFunction {
      * @return
      */
     Object invoke(String currentPath, PathRef parent, Object model, EvaluationContext ctx, List<Parameter> parameters);
+
+    void evaluateParameters(String currentPath, PathRef parent, Object model, List<Parameter> functionParams, EvaluationContextImpl ctx);
+
 }

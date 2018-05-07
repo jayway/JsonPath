@@ -4,8 +4,12 @@ import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.internal.EvaluationContext;
 import com.jayway.jsonpath.internal.PathRef;
 import com.jayway.jsonpath.internal.Utils;
+import com.jayway.jsonpath.internal.function.AbstractPathFunction;
 import com.jayway.jsonpath.internal.function.Parameter;
-import com.jayway.jsonpath.internal.function.PathFunction;
+import com.jayway.jsonpath.internal.function.latebinding.JsonLateBindingValue;
+import com.jayway.jsonpath.internal.function.latebinding.PathArrayLateBindingValue;
+import com.jayway.jsonpath.internal.function.latebinding.StringLateBindingValue;
+import com.jayway.jsonpath.internal.path.EvaluationContextImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +19,7 @@ import java.util.List;
  *
  * Created by fbrissi on 6/26/15.
  */
-public class Join implements PathFunction {
+public class Join extends AbstractPathFunction {
 
     @Override
     public Object invoke(String currentPath, PathRef parent, Object model, EvaluationContext ctx, List<Parameter> parameters) {
@@ -39,4 +43,27 @@ public class Join implements PathFunction {
         throw new JsonPathException("Join function attempted to calculate value using empty array");
     }
 
+    @Override
+    public void evaluateParameters(String currentPath, PathRef parent, Object model, List<Parameter> functionParams, EvaluationContextImpl ctx) {
+        if (null != functionParams) {
+            for (Parameter param : functionParams) {
+                if (!param.hasEvaluated()) {
+                    switch (param.getType()) {
+                        case PATH:
+                            param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), model, ctx.configuration()));
+                            param.setEvaluated(true);
+                            break;
+                        case JSON:
+                            param.setLateBinding(new JsonLateBindingValue(ctx.configuration().jsonProvider(), param));
+                            param.setEvaluated(true);
+                            break;
+                        case STRING:
+                            param.setLateBinding(new StringLateBindingValue(param));
+                            param.setEvaluated(true);
+                            break;
+                    }
+                }
+            }
+        }
+    }
 }
