@@ -51,7 +51,7 @@ public class Join extends AbstractPathFunction {
                     switch (param.getType()) {
                         case PATH:
                             param.setLateBinding(new PathArrayLateBindingValue(param.getPath(), model, ctx.configuration()));
-                            param.setEvaluated(true);
+                            param.setEvaluated(false);
                             break;
                         case JSON:
                             param.setLateBinding(new JsonLateBindingValue(ctx.configuration().jsonProvider(), param));
