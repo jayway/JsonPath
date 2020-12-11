@@ -17,6 +17,8 @@ package com.jayway.jsonpath.internal.function.latebinding;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.internal.Path;
 
+import java.util.List;
+
 /**
  * Defines the contract for late bindings, provides document state and enough context to perform the evaluation at a later
  * date such that we can operate on a dynamically changing value.
@@ -24,35 +26,22 @@ import com.jayway.jsonpath.internal.Path;
  * Acts like a lambda function with references, but since we're supporting JDK 6+, we're left doing this...
  *
  */
-public class PathLateBindingValue implements ILateBindingValue {
-    private final Path path;
-    private final Object rootDocument;
-    private final Configuration configuration;
+public class PathArrayLateBindingValue extends PathLateBindingValue {
 
-    public PathLateBindingValue(final Path path, final Object rootDocument, final Configuration configuration) {
-        this.path = path;
-        this.rootDocument = rootDocument;
-        this.configuration = configuration;
+    private int index;
+
+    public PathArrayLateBindingValue(Path path, Object rootDocument, Configuration configuration) {
+        super(path, rootDocument, configuration);
     }
 
-    /**
-     * Evaluate the expression at the point of need for Path type expressions
-     *
-     * @return the late value
-     */
+
+    @Override
     public Object get() {
-        return path.evaluate(rootDocument, rootDocument, configuration).getValue();
+        return getPath().evaluate(((List) getRootDocument()).get(index), ((List) getRootDocument()).get(index), getConfiguration()).getValue();
     }
 
-    protected Path getPath() {
-        return path;
-    }
-
-    public Object getRootDocument() {
-        return rootDocument;
-    }
-
-    protected Configuration getConfiguration() {
-        return configuration;
+    public void setIndex(int index) {
+        this.index = index;
     }
 }
+

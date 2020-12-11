@@ -10,7 +10,7 @@ import java.util.List;
  *
  * Created by mattg on 6/26/15.
  */
-public class PassthruPathFunction implements PathFunction {
+public class PassthruPathFunction extends AbstractPathFunction {
 
     @Override
     public Object invoke(String currentPath, PathRef parent, Object model, EvaluationContext ctx, List<Parameter> parameters) {

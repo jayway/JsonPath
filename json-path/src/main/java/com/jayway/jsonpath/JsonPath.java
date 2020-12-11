@@ -171,11 +171,17 @@ public class JsonPath {
 
         try {
             if (path.isFunctionPath()) {
-                if (optAsPathList || optAlwaysReturnList) {
+                if (optAsPathList) {
                     throw new JsonPathException("Options " + AS_PATH_LIST + " and " + ALWAYS_RETURN_LIST + " are not allowed when using path functions!");
                 }
-                return path.evaluate(jsonObject, jsonObject, configuration).getValue(true);
-
+                Object res =  path.evaluate(jsonObject, jsonObject, configuration).getValue(true);
+                if (optAlwaysReturnList) {
+                    Object array = configuration.jsonProvider().createArray();
+                    configuration.jsonProvider().setArrayIndex(array, 0, res);
+                    return (T) array;
+                } else {
+                    return (T) res;
+                }
             } else if (optAsPathList) {
                 return (T) path.evaluate(jsonObject, jsonObject, configuration).getPath();
 

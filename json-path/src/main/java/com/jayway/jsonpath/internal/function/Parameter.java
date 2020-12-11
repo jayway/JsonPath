@@ -3,10 +3,9 @@ package com.jayway.jsonpath.internal.function;
 import com.jayway.jsonpath.internal.EvaluationContext;
 import com.jayway.jsonpath.internal.Path;
 import com.jayway.jsonpath.internal.function.latebinding.ILateBindingValue;
+import com.jayway.jsonpath.internal.function.latebinding.PathArrayLateBindingValue;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Defines a parameter as passed to a function with late binding support for lazy evaluation.
@@ -17,6 +16,7 @@ public class Parameter {
     private ILateBindingValue lateBinding;
     private Boolean evaluated = false;
     private String json;
+    private String string;
 
     public Parameter() {}
 
@@ -32,6 +32,10 @@ public class Parameter {
 
     public Object getValue() {
         return lateBinding.get();
+    }
+
+    public ILateBindingValue getLateBinding() {
+        return lateBinding;
     }
 
     public void setLateBinding(ILateBindingValue lateBinding) {
@@ -70,6 +74,14 @@ public class Parameter {
         this.json = json;
     }
 
+    public String getString() {
+        return string;
+    }
+
+    public void setString(String string) {
+        this.string = string;
+    }
+
     /**
      * Translate the collection of parameters into a collection of values of type T.
      *
@@ -96,6 +108,37 @@ public class Parameter {
             }
         }
         return values;
+    }
+
+    public static String toDelimiterValue(final EvaluationContext ctx, final List<Parameter> parameters) {
+        List<String> values = new ArrayList();
+        if (null != parameters) {
+            for (int i = 0; i < parameters.size(); i++) {
+                consume(Object.class, ctx, values, parameters.get(i).getValue());
+                return values.get(0);
+            }
+        }
+        return ", ";
+    }
+
+    public static Parameter toPathJoin(final List<Parameter> parameters) {
+        if (parameters.size() > 1) {
+            return parameters.get(1);
+        }
+        return null;
+    }
+
+    public static Object toConvertJoinValue(final Object model, final int index, final EvaluationContext ctx, final Parameter parameter) {
+        List values = new ArrayList();
+        if (null != parameter) {
+            if (parameter.getLateBinding() instanceof PathArrayLateBindingValue) {
+                ((PathArrayLateBindingValue) parameter.getLateBinding()).setIndex(index);
+            }
+            consume(Object.class, ctx, values, parameter.getValue());
+            return ctx.configuration().jsonProvider().isArray(model) ? values : !values.isEmpty() ? values.get(0) : null;
+        }
+
+        return model;
     }
 
     /**
